@@ -5,10 +5,14 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+<<<<<<< Updated upstream
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+=======
+import lombok.*;
+>>>>>>> Stashed changes
 import org.hibernate.annotations.ColumnDefault;
 
 @Entity
@@ -36,9 +40,15 @@ public class User {
     private String address;
 
     @Column(name="profile_image_url", nullable = false)
-    @ColumnDefault("https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973461_960_720.png")
-    private String profileImageUrl;
+    private String profileImageUrl = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973461_960_720.png";
 
     @Column(name = "is_active", columnDefinition = "boolean default true")
     private Boolean isActive;
+
+    @Builder
+    public User(String email, String password, String nickname) {
+        this.email = email;
+        this.password = password;
+        this.nickname = nickname;
+    }
 }

@@ -5,6 +5,7 @@ import com.godchigam.godchigam.auth.dto.UserSignupResponse;
 import com.godchigam.godchigam.auth.entity.User;
 import com.godchigam.godchigam.auth.repository.UserRepository;
 import com.godchigam.godchigam.global.jwt.JwtTokenProvider;
+import com.godchigam.godchigam.global.jwt.JwtTokenProvider.TokenType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +23,7 @@ public class UserService {
                 .nickname(userSignupRequest.getNickname())
                 .build();
         user = userRepository.save(user);
-        String newJwt = jwtTokenProvider.generateToken(user.getUserId());
+        String newJwt = jwtTokenProvider.generateToken(TokenType.Access, user.getUserId());
         System.out.println("new jwt is -> " + newJwt);
         return UserSignupResponse.builder()
                 .userId(user.getUserId())

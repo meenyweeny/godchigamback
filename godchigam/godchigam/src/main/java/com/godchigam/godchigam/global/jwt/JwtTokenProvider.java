@@ -1,6 +1,7 @@
 package com.godchigam.godchigam.global.jwt;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -15,32 +16,41 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class JwtTokenProvider implements InitializingBean {
+public class JwtTokenProvider {
+
+    public enum TokenType {
+        Access, Refresh
+    };
 
     @Value("${jwt.secret}")
     private String secretKey;
 
-    public String generateToken(Long userId) {
-        Claims claims = Jwts.claims().setSubject(String.valueOf(userId));
+    public String generateToken(TokenType tokenType, Long userId) {
         Date now = new Date();
+        int duration = tokenType.equals(TokenType.Access) ? 1 : 20;
+        Claims claims = Jwts.claims()
+                .setSubject(String.valueOf(userId))
+                .setIssuedAt(now)
+                .setExpiration(new Date(now.getTime() + Duration.ofDays(duration).toMillis()));
         String jwt = Jwts.builder()
                 .setHeaderParam(Header.TYPE, Header.JWT_TYPE)
-                .setExpiration(new Date(now.getTime() + Duration.ofDays(20).toMillis()))
                 .setClaims(claims)
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
-        System.out.println(jwt);
         return jwt;
+    }
+
+    public boolean isValidToken(String token) {
+        try {
+            Claims claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
+            return claims.getExpiration().before(new Date());
+        } catch(ExpiredJwtException expiredJwtException) {
+            return false;
+        }
     }
 
     public Long getUserId(String accessToken) {
         String userId = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(accessToken).getBody().getSubject();
-        System.out.println("jwt parse " + userId);
         return Long.parseLong(userId);
-    }
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-
     }
 }

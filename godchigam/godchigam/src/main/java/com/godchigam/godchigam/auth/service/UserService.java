@@ -6,32 +6,37 @@ import com.godchigam.godchigam.auth.dto.UserSignupRequest;
 import com.godchigam.godchigam.auth.dto.UserSignupResponse;
 import com.godchigam.godchigam.auth.entity.User;
 import com.godchigam.godchigam.auth.repository.UserRepository;
+import com.godchigam.godchigam.global.auth.PasswordEncoder;
 import com.godchigam.godchigam.global.jwt.JwtTokenProvider;
 import com.godchigam.godchigam.global.jwt.JwtTokenProvider.TokenType;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.antlr.v4.runtime.Token;
 import org.springframework.stereotype.Service;
 
 @Service
+@Transactional(rollbackOn = {Exception.class})
 @RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserSignupResponse signupUser(UserSignupRequest userSignupRequest) {
+    public UserSignupResponse signupUser(UserSignupRequest userSignupRequest) throws Exception {
         User user = User.builder()
                 .email(userSignupRequest.getEmail())
-                .password(userSignupRequest.getPassword())
+                .password(passwordEncoder.encrypt(userSignupRequest.getEmail(), userSignupRequest.getPassword()))
                 .nickname(userSignupRequest.getNickname())
                 .build();
-        user = userRepository.save(user);
-        String newJwt = jwtTokenProvider.generateToken(TokenType.Access, user.getUserId());
-        System.out.println("new jwt is -> " + newJwt);
+        User savedUser = userRepository.save(user);
+        if(user.getEmail().equals("e@gmail.com")) {
+            throw new Exception("일부러~");
+        }
         return UserSignupResponse.builder()
-                .userId(user.getUserId())
-                .email(user.getEmail())
-                .password(user.getPassword())
+                .userId(savedUser.getUserId())
+                .email(savedUser.getEmail())
+                .password(savedUser.getPassword())
+                .nickname(savedUser.getNickname())
                 .build();
     }
 
@@ -40,7 +45,7 @@ public class UserService {
         if(user == null) {
             throw new Exception("유저 없음ㅋ");
         }
-        if(!user.getPassword().equals(userLoginRequest.getPassword())) {
+        if(!user.getPassword().equals(passwordEncoder.encrypt(userLoginRequest.getEmail(), userLoginRequest.getPassword()))) {
             throw new Exception("비밀번호 다름ㅋ");
         }
         String accessToken = jwtTokenProvider.generateToken(TokenType.Access, user.getUserId());

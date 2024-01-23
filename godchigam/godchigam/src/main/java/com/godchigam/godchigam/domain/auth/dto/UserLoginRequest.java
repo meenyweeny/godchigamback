@@ -1,4 +1,4 @@
-package com.godchigam.godchigam.auth.dto;
+package com.godchigam.godchigam.domain.auth.dto;
 
 import lombok.Getter;
 

@@ -1,11 +1,11 @@
-package com.godchigam.godchigam.auth.controller;
+package com.godchigam.godchigam.domain.auth.controller;
 
-import com.godchigam.godchigam.auth.dto.UserLoginRequest;
-import com.godchigam.godchigam.auth.dto.UserLoginResponse;
-import com.godchigam.godchigam.auth.dto.UserSignupRequest;
-import com.godchigam.godchigam.auth.dto.UserSignupResponse;
-import com.godchigam.godchigam.auth.service.UserService;
-import io.jsonwebtoken.ExpiredJwtException;
+import com.godchigam.godchigam.domain.auth.dto.UserLoginRequest;
+import com.godchigam.godchigam.domain.auth.dto.UserLoginResponse;
+import com.godchigam.godchigam.domain.auth.dto.UserSignupRequest;
+import com.godchigam.godchigam.domain.auth.dto.UserSignupResponse;
+import com.godchigam.godchigam.domain.auth.service.UserService;
+import com.godchigam.godchigam.global.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
     private final UserService userService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/signup")
     public ResponseEntity<UserSignupResponse> signUpUser(@RequestBody UserSignupRequest userSignupRequest) throws Exception {

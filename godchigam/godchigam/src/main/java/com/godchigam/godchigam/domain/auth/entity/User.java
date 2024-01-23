@@ -1,4 +1,4 @@
-package com.godchigam.godchigam.auth.entity;
+package com.godchigam.godchigam.domain.auth.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

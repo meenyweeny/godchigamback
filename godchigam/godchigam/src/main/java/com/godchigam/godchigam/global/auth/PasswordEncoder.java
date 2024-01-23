@@ -12,9 +12,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class PasswordEncoder {
 
-    public String encrypt(String email, String password) {
+    public String encrypt(Long userId, String password) {
         try {
-            KeySpec spec = new PBEKeySpec(password.toCharArray(), getSalt(email), 85319, 256);
+            KeySpec spec = new PBEKeySpec(password.toCharArray(), getSalt(userId), 85319, 256);
             SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
 
             byte[] hash = factory.generateSecret(spec).getEncoded();
@@ -24,12 +24,10 @@ public class PasswordEncoder {
         }
     }
 
-    private byte[] getSalt(String email)
-            throws NoSuchAlgorithmException, UnsupportedEncodingException {
-
+    private byte[] getSalt(Long userId) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        String key = userId.toString();
         MessageDigest digest = MessageDigest.getInstance("SHA-512");
-        byte[] keyBytes = email.getBytes("UTF-8");
-
+        byte[] keyBytes = key.getBytes("UTF-8");
         return digest.digest(keyBytes);
     }
 }

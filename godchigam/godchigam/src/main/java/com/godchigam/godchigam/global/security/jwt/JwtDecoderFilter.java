@@ -1,8 +1,10 @@
 package com.godchigam.godchigam.global.security.jwt;
 
+import com.godchigam.godchigam.global.jwt.JwtTokenProvider;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -11,6 +13,13 @@ import java.io.PrintWriter;
 public class JwtDecoderFilter implements Filter {
 
     private final String AUTHORIZATION_HEADER = "Authorization";
+    private final String ACCESS_TOKEN = "AccessToken";
+    private final String REFRESH_TOKEN = "RefreshToken";
+    private final JwtTokenProvider jwtTokenProvider;
+
+    public JwtDecoderFilter(JwtTokenProvider tokenProvider) {
+        this.jwtTokenProvider = tokenProvider;
+    }
 
     @Override
     public void doFilter(
@@ -24,7 +33,7 @@ public class JwtDecoderFilter implements Filter {
 
         if(authorization == null) {
             filterChain.doFilter(request, response); // 필터를 등록해주지 않으면 이 함수 종료와 동시에 끝나게 됨
-            return;
+//            return;
         }
 
         // token을 만들어야 함 -> id, pw가 정상적으로 들어와서 login 완료되면 token을 만들어주고 그걸로 응답을 해줌
@@ -34,6 +43,8 @@ public class JwtDecoderFilter implements Filter {
             System.out.println("POST 요청됨");
             System.out.println(authorization);
         }
+
+//        SecurityContextHolder.getContext().setAuthentication();
 
 //        if(authorization.equals("meenyweeny")) {
 //            filterChain.doFilter(request, response); // 필터를 등록해주지 않으면 이 함수 종료와 동시에 끝나게 됨

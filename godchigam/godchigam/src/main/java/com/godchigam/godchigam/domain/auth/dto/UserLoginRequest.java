@@ -1,8 +1,9 @@
 package com.godchigam.godchigam.domain.auth.dto;
 
+import lombok.Data;
 import lombok.Getter;
 
-@Getter
+@Data
 public class UserLoginRequest {
 
     String email;

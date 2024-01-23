@@ -6,11 +6,13 @@ import com.godchigam.godchigam.domain.auth.dto.UserSignupRequest;
 import com.godchigam.godchigam.domain.auth.dto.UserSignupResponse;
 import com.godchigam.godchigam.domain.auth.entity.User;
 import com.godchigam.godchigam.domain.auth.repository.UserRepository;
-import com.godchigam.godchigam.global.auth.PasswordEncoder;
 import com.godchigam.godchigam.global.jwt.JwtTokenProvider;
 import com.godchigam.godchigam.global.jwt.JwtTokenProvider.TokenType;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -20,7 +22,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
-    private final PasswordEncoder passwordEncoder;
+    private final BCryptPasswordEncoder passwordEncoder;
 
     public UserSignupResponse signupUser(UserSignupRequest userSignupRequest) throws Exception {
         User user = User.builder()
@@ -42,11 +44,8 @@ public class UserService {
     }
 
     public UserLoginResponse login(UserLoginRequest userLoginRequest) throws Exception {
-        User user = userRepository.findByEmail(userLoginRequest.getEmail());
-        if(user == null) {
-            throw new Exception("유저 없음ㅋ");
-        }
-        if(!user.getPassword().equals(passwordEncoder.encrypt(user.getUserId(), userLoginRequest.getPassword()))) {
+        User user = userRepository.findByEmail(userLoginRequest.getEmail()).orElseThrow(() -> new UsernameNotFoundException("유저업슴ㅋㅋㅋ"));
+        if(!user.getPassword().equals(passwordEncoder.encode(userLoginRequest.getPassword()))) {
             throw new Exception("비밀번호 다름ㅋ");
         }
         String accessToken = jwtTokenProvider.generateToken(TokenType.Access, user.getUserId());
@@ -61,6 +60,6 @@ public class UserService {
     }
 
     public int updatePassword(Long userId, String password) {
-        return userRepository.updatePassword(userId, passwordEncoder.encrypt(userId, password));
+        return userRepository.updatePassword(userId, passwordEncoder.encode(password));
     }
 }

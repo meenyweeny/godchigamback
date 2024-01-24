@@ -17,18 +17,14 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 
 @Configuration
-//@RequiredArgsConstructor
 public class JwtTokenProvider {
 
     public enum TokenType {
         Access, Refresh
     };
 
-    private final String secretKey;
-
-    public JwtTokenProvider(@Value("${jwt.secret}") String secretKey) {
-        this.secretKey = secretKey;
-    }
+    @Value("${jwt.secret}")
+    private String secretKey;
 
     public String generateToken(TokenType tokenType, Long userId) {
         Date now = new Date();
@@ -51,7 +47,7 @@ public class JwtTokenProvider {
         Claims claims = Jwts.claims()
                 .setSubject(email)
                 .setIssuedAt(now)
-                .setExpiration(new Date(now.getTime() + Duration.ofDays(1).toMillis()));
+                .setExpiration(new Date(now.getTime() + Duration.ofSeconds(1).toMillis()));
         String jwt = Jwts.builder()
                 .setHeaderParam(Header.TYPE, Header.JWT_TYPE)
                 .setClaims(claims)
@@ -79,14 +75,15 @@ public class JwtTokenProvider {
     public boolean isValidToken(String token) {
         try {
             Claims claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
-            return claims.getExpiration().before(new Date());
+            return true;
         } catch(ExpiredJwtException expiredJwtException) {
             return false;
         }
     }
 
-    public Long getUserId(String accessToken) {
-        String userId = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(accessToken).getBody().getSubject();
-        return Long.parseLong(userId);
+    public String getUserEmail(String accessToken) {
+        String email = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(accessToken).getBody().getSubject();
+        System.out.println("TOKEN PROVIDER GET USER EMAILS -> " + email);
+        return email;
     }
 }

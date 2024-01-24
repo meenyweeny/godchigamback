@@ -2,6 +2,7 @@ package com.godchigam.godchigam.domain.auth.service;
 
 import com.godchigam.godchigam.domain.auth.dto.UserLoginRequest;
 import com.godchigam.godchigam.domain.auth.dto.UserLoginResponse;
+import com.godchigam.godchigam.domain.auth.dto.UserNicknameResponse;
 import com.godchigam.godchigam.domain.auth.dto.UserSignupRequest;
 import com.godchigam.godchigam.domain.auth.dto.UserSignupResponse;
 import com.godchigam.godchigam.domain.auth.entity.User;
@@ -61,5 +62,12 @@ public class UserService {
 
     public int updatePassword(Long userId, String password) {
         return userRepository.updatePassword(userId, passwordEncoder.encode(password));
+    }
+
+    public UserNicknameResponse findNickname(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("ksdfjlsdkjfldksj"));
+        return UserNicknameResponse.builder()
+                .nickname(user.getNickname())
+                .build();
     }
 }

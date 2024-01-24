@@ -22,18 +22,11 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfiguration {
 
     private final JwtAuthenticationManager authenticationManager;
-
-    @Value("${jwt.secret}")
-    String secretKey;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    public JwtTokenProvider tokenProvider() {
-        return new JwtTokenProvider(secretKey);
     }
 
     @Bean
@@ -42,8 +35,8 @@ public class SecurityConfiguration {
         http.sessionManagement(configurer ->
                         configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilter(new CorsFilterConfiguration().corsFilter())
-                .addFilter(new JwtAuthenticationFilter(authenticationManager, tokenProvider()))
-                .formLogin(configurer -> configurer.disable())
+                .addFilter(new JwtAuthenticationFilter(authenticationManager, jwtTokenProvider))
+                .formLogin(configurer -> configurer.disable()) 
                 .httpBasic(configurer -> configurer.disable())
                 .authorizeHttpRequests(request ->
                         request.anyRequest().permitAll());
